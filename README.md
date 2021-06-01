@@ -1,3 +1,13 @@
+# What is this fork?
+
+This fork introduces double borders around the dunst notification window with the introduced options `outer_frame_width` and `outer_frame_color`.
+
+<img src="https://user-images.githubusercontent.com/57952969/107906812-152f7380-6f20-11eb-9a12-0cf6e878e797.png" alt="img" align="center">
+
+If you'd like to see this upstream, then voice your support [here](https://github.com/dunst-project/dunst/issues/738)! The maintainers are not interested in merging this unless folks like you tell them you want to see this upstream.
+
+# Original README
+
 [![main](https://github.com/dunst-project/dunst/workflows/main/badge.svg)](https://github.com/dunst-project/dunst/actions?query=workflow%3Amain) [![codecov](https://codecov.io/gh/dunst-project/dunst/branch/master/graph/badge.svg)](https://codecov.io/gh/dunst-project/dunst)
 
 # Dunst
