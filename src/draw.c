@@ -33,6 +33,7 @@ struct colored_layout {
         struct color bg;
         struct color highlight;
         struct color frame;
+        struct color outer_frame;
         char *text;
         PangoAttrList *attr;
         cairo_surface_t *icon;
@@ -224,7 +225,7 @@ static struct dimensions calculate_dimensions(GSList *layouts)
                 dim.w = scr->w;
         }
 
-        dim.h += 2 * settings.frame_width;
+        dim.h += (2 * settings.frame_width) + ( 2 * settings.outer_frame_width);
         dim.h += (g_slist_length(layouts) - 1) * settings.separator_height;
 
         dim.corner_radius = settings.corner_radius;
@@ -254,13 +255,13 @@ static struct dimensions calculate_dimensions(GSList *layouts)
                                 dim.w = scr->w - settings.geometry.x * 2;
                         } else if (have_dynamic_width() || (total_width < settings.geometry.w && settings.shrink)) {
                                 /* set width to text width */
-                                dim.w = total_width + 2 * settings.frame_width;
+                                dim.w = total_width + 2 * settings.frame_width + 2 * settings.outer_frame_width;
                         }
 
                         /* re-setup the layout */
                         w = dim.w;
                         w -= 2 * settings.h_padding;
-                        w -= 2 * settings.frame_width;
+                        w -= 2 * settings.frame_width + 2 * settings.outer_frame_width;
                         if (cl->icon) {
                                 w -= get_icon_width(cl->icon, scale) + get_text_icon_padding();
                         }
@@ -287,7 +288,7 @@ static struct dimensions calculate_dimensions(GSList *layouts)
 
         if (dim.w <= 0) {
                 dim.w = text_width + 2 * settings.h_padding;
-                dim.w += 2 * settings.frame_width;
+                dim.w += 2 * settings.frame_width + 2 * settings.outer_frame_width;
         }
 
         return dim;
@@ -347,6 +348,7 @@ static struct colored_layout *layout_init_shared(cairo_t *c, const struct notifi
         cl->bg = string_to_color(n->colors.bg);
         cl->highlight = string_to_color(n->colors.highlight);
         cl->frame = string_to_color(n->colors.frame);
+        cl->outer_frame = string_to_color(n->colors.outer_frame);
 
         cl->n = n;
 
@@ -357,7 +359,7 @@ static struct colored_layout *layout_init_shared(cairo_t *c, const struct notifi
                 layout_setup_pango(cl->l, -1);
         } else {
                 width -= 2 * settings.h_padding;
-                width -= 2 * settings.frame_width;
+                width -= 2 * settings.frame_width + 2 * settings.outer_frame_width;
                 if (cl->icon) {
                         width -= get_icon_width(cl->icon, scale) + get_text_icon_padding();
                 }
@@ -582,39 +584,64 @@ static cairo_surface_t *render_background(cairo_surface_t *srf,
         cairo_set_operator(c, CAIRO_OPERATOR_ADD);
 
         if (first)
-                height += settings.frame_width;
+                height += settings.frame_width + settings.outer_frame_width;
         if (last)
-                height += settings.frame_width;
+                height += settings.frame_width + settings.outer_frame_width;
         else
                 height += settings.separator_height;
 
         draw_rounded_rect(c, x, y, width, height, corner_radius, scale, first, last);
 
-        /* adding frame */
+        /* adding outer frame */
+        x += settings.outer_frame_width;
+        
+        if (first) {
+                y += settings.outer_frame_width;
+                height -= settings.outer_frame_width;
+        }
+
+        width -= (2 * settings.outer_frame_width);
+
+        if (last) {
+                height -= settings.outer_frame_width;
+        }
+
+        draw_rounded_rect(c, x, y, width, height, corner_radius, scale, first, last); 
+
+        /* adding inner frame */
         x += settings.frame_width;
         if (first) {
                 y += settings.frame_width;
                 height -= settings.frame_width;
         }
 
-        width -= 2 * settings.frame_width;
+        width -= (2 * settings.frame_width);
 
-        if (last)
+        if (last) {
                 height -= settings.frame_width;
+        }
         else
                 height -= settings.separator_height;
 
         radius_int = frame_internal_radius(corner_radius, settings.frame_width, height);
 
+        // Draw outer frame first
         draw_rounded_rect(c, x, y, width, height, radius_int, scale, first, last);
+        cairo_set_source_rgba(c, cl->outer_frame.r, cl->outer_frame.g, cl->outer_frame.b, cl->outer_frame.a);
+        cairo_fill(c);        
+
+        //Draw inner frame next
+        cairo_set_operator(c, CAIRO_OPERATOR_DEST_OVER);
+        draw_rounded_rect(c, x-(settings.frame_width), y-settings.frame_width, width+2*settings.frame_width, height+2*settings.frame_width+settings.separator_height, radius_int, scale, first, last);
         cairo_set_source_rgba(c, cl->frame.r, cl->frame.g, cl->frame.b, cl->frame.a);
         cairo_fill(c);
 
+        //Draw main body background
+        cairo_set_operator(c, CAIRO_OPERATOR_SOURCE);
         draw_rounded_rect(c, x, y, width, height, radius_int, scale, first, last);
         cairo_set_source_rgba(c, cl->bg.r, cl->bg.g, cl->bg.b, cl->bg.a);
         cairo_fill(c);
 
-        cairo_set_operator(c, CAIRO_OPERATOR_SOURCE);
 
         if (   settings.sep_color.type != SEP_FRAME
             && settings.separator_height > 0
@@ -622,7 +649,7 @@ static cairo_surface_t *render_background(cairo_surface_t *srf,
                 struct color sep_color = layout_get_sepcolor(cl, cl_next);
                 cairo_set_source_rgba(c, sep_color.r, sep_color.g, sep_color.b, sep_color.a);
 
-                draw_rect(c, settings.frame_width, y + height, width, settings.separator_height, scale);
+                draw_rect(c, settings.frame_width + settings.outer_frame_width, y + height, width, settings.separator_height, scale);
 
                 cairo_fill(c);
         }
@@ -755,7 +782,7 @@ static struct dimensions layout_render(cairo_surface_t *srf,
 
         /* adding frame */
         if (first)
-                dim.y += settings.frame_width;
+                dim.y += settings.frame_width + settings.outer_frame_width;
 
         if (!last)
                 dim.y += settings.separator_height;

@@ -31,6 +31,7 @@ typedef struct _notification_private NotificationPrivate;
 
 struct notification_colors {
         char *frame;
+        char *outer_frame;
         char *bg;
         char *fg;
         char *highlight;

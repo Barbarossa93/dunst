@@ -84,7 +84,9 @@ struct settings {
         int text_icon_padding;
         struct separator_color_data sep_color;
         int frame_width;
+        int outer_frame_width;
         char *frame_color;
+        char *outer_frame_color;
         int startup_notification;
         int monitor;
         char *dmenu;

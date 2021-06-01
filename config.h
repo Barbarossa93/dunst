@@ -58,7 +58,9 @@ struct settings defaults = {
 .sep_color = {SEP_AUTO},     /* SEP_AUTO, SEP_FOREGROUND, SEP_FRAME, SEP_CUSTOM */
 
 .frame_width = 0,
+.outer_frame_width = 0,
 .frame_color = "#888888",
+.outer_frame_color = "#888888",
 
 /* show a notification on startup
  * This is mainly for crash detection since dbus restarts dunst

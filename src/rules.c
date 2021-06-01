@@ -50,6 +50,10 @@ void rule_apply(struct rule *r, struct notification *n)
                 g_free(n->colors.frame);
                 n->colors.frame = g_strdup(r->fc);
         }
+        if (r->ofc) {
+                g_free(n->colors.outer_frame);
+                n->colors.outer_frame = g_strdup(r->fc);
+        }
         if (r->format)
                 n->format = r->format;
         if (r->script){

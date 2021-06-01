@@ -67,6 +67,7 @@ void notification_print(const struct notification *n)
         printf("\tbg: %s\n", n->colors.bg);
         printf("\thighlight: %s\n", n->colors.highlight);
         printf("\tframe: %s\n", n->colors.frame);
+        printf("\touter_frame: %s\n", n->colors.outer_frame);
         printf("\tfullscreen: %s\n", enum_to_string_fullscreen(n->fullscreen));
         printf("\tprogress: %d\n", n->progress);
         printf("\tstack_tag: %s\n", (n->stack_tag ? n->stack_tag : ""));
@@ -283,6 +284,7 @@ void notification_unref(struct notification *n)
         g_free(n->colors.bg);
         g_free(n->colors.highlight);
         g_free(n->colors.frame);
+        g_free(n->colors.outer_frame);
         g_free(n->stack_tag);
         g_free(n->desktop_entry);
 
@@ -445,6 +447,8 @@ void notification_init(struct notification *n)
                 n->colors.highlight = g_strdup(defcolors.highlight);
         if (!n->colors.frame)
                 n->colors.frame = g_strdup(defcolors.frame);
+        if (!n->colors.outer_frame)
+                n->colors.outer_frame = g_strdup(defcolors.outer_frame);
 
         /* Sanitize misc hints */
         if (n->progress < 0)

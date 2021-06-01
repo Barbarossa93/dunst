@@ -605,6 +605,13 @@ void load_settings(char *cmdline_config_path)
                         "Width of frame around the window"
                 );
 
+                settings.outer_frame_width = option_get_int(
+                        "global",
+                        "outer_frame_width", "-outer_frame_width",
+                        settings.outer_frame_width ? settings.outer_frame_width : defaults.outer_frame_width,
+                        "Outer width of frame around the window"
+                );
+
                 if (ini_is_set("frame", "color")) {
                         settings.frame_color = option_get_string(
                                 "frame",
@@ -621,6 +628,24 @@ void load_settings(char *cmdline_config_path)
                         "frame_color", "-frame_color",
                         settings.frame_color ? settings.frame_color : defaults.frame_color,
                         "Color of the frame around the window"
+                );
+
+                if (ini_is_set("outer_frame", "color")) {
+                        settings.outer_frame_color = option_get_string(
+                                "outer_frame",
+                                "color", NULL, defaults.outer_frame_color,
+                                "Color of the outer frame around the window"
+                        );
+                        LOG_M("The frame section is deprecated, color "
+                              "has been renamed to outer_frame_color and moved "
+                              "to the global section.");
+                }
+
+                settings.outer_frame_color = option_get_string(
+                        "global",
+                        "outer_frame_color", "-outer_frame_color",
+                        settings.outer_frame_color ? settings.outer_frame_color : defaults.outer_frame_color,
+                        "Outer color of the frame around the window"
                 );
 
         }
@@ -681,6 +706,13 @@ void load_settings(char *cmdline_config_path)
                 "highlight", "-lh", defaults.colors_low.highlight,
                 "Highlight color for notifications with low urgency"
         );
+        
+        settings.colors_low.outer_frame = option_get_string(
+                "urgency_low",
+                "outer_frame_color", "-lfr", settings.outer_frame_color ? settings.outer_frame_color : defaults.colors_low.outer_frame,
+                "Frame color for notifications with low urgency"
+        );
+
 
         settings.colors_low.frame = option_get_string(
                 "urgency_low",
@@ -718,6 +750,12 @@ void load_settings(char *cmdline_config_path)
                 "Highlight color for notifications with normal urgency"
         );
 
+        settings.colors_norm.outer_frame = option_get_string(
+                "urgency_normal",
+                "outer_frame_color", "-nfr", settings.outer_frame_color ? settings.outer_frame_color : defaults.colors_norm.outer_frame,
+                "Frame color for notifications with normal urgency"
+        );
+
         settings.colors_norm.frame = option_get_string(
                 "urgency_normal",
                 "frame_color", "-nfr", settings.frame_color ? settings.frame_color : defaults.colors_norm.frame,
@@ -752,6 +790,12 @@ void load_settings(char *cmdline_config_path)
                 "urgency_critical",
                 "highlight", "-ch", defaults.colors_crit.highlight,
                 "Highlight color for notifications with ciritical urgency"
+        );
+
+        settings.colors_crit.outer_frame = option_get_string(
+                "urgency_critical",
+                "outer_frame_color", "-cfr", settings.outer_frame_color ? settings.outer_frame_color : defaults.colors_crit.outer_frame,
+                "Frame color for notifications with critical urgency"
         );
 
         settings.colors_crit.frame = option_get_string(
@@ -869,6 +913,7 @@ void load_settings(char *cmdline_config_path)
                 r->bg = ini_get_string(cur_section, "background", r->bg);
                 r->highlight = ini_get_string(cur_section, "highlight", r->highlight);
                 r->fc = ini_get_string(cur_section, "frame_color", r->fc);
+                r->ofc = ini_get_string(cur_section, "outer_frame_color", r->ofc);
                 r->format = ini_get_string(cur_section, "format", r->format);
                 r->new_icon = ini_get_string(cur_section, "new_icon", r->new_icon);
                 r->history_ignore = ini_get_bool(cur_section, "history_ignore", r->history_ignore);
